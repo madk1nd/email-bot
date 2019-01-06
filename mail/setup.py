@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
 	name='apimail',
 	packages=['api'],
-	install_requires=['aiohttp'],
+	install_requires=['aiohttp', 'aiohttp_swagger'],
 	entry_points={
 		'console_scripts': ['apimail=api.application:main'],
 	},
