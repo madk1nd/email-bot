@@ -5,6 +5,8 @@ from aiohttp import web
 from aiohttp_swagger import setup_swagger
 from .config import IP, PORT, MAIL_CERT_PATH, TOKEN
 from .views import routes
+from .dispatcher import Dispatcher
+from .db.mongo import MongoClient
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
@@ -13,10 +15,19 @@ def main():
     app = web.Application()
     app.router.add_routes(routes)
 
+    client = MongoClient()
+    app['mongo'] = client
+    app['dispatcher'] = Dispatcher(client)
+    app.on_startup.append(on_startup)
+
     setup_swagger(app)
 
     context = prepare_ssl()
     web.run_app(app, host=IP, port=PORT, ssl_context=context)
+
+
+async def on_startup(app):
+    await app['mongo'].on_startup()
 
 
 def prepare_ssl():

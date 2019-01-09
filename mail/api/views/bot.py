@@ -1,9 +1,6 @@
 from aiohttp import web
 from . import routes
 from ..config import TOKEN
-from ..dispatcher import Dispatcher
-
-dispatcher = Dispatcher()
 
 
 @routes.post('/updates/{token}'.format(token=TOKEN))
@@ -12,5 +9,5 @@ async def dispatch(req):
     updates = data['result']
     if updates:
         for update in updates:
-            await dispatcher.dispatch(update)
+            await req.app['dispatcher'].dispatch(update)
     return web.Response()
