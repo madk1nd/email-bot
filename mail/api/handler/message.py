@@ -87,17 +87,15 @@ class MessageHandler(ITelegramHandler):
 
     async def on_accounts(self, update):
         docs = await self.mongo.find_by(update['message']['chat']['id'])
-        logger.debug(docs)
-        # text = 'At this moment you have {} accounts:'.format(len(docs))
-        text = str(docs)
+        text = 'At this moment you have {} accounts:'.format(len(docs))
         method = 'sendMessage'
         buttons = {
-            'inline_keyboard': [self.to_buttons(docs)]
+            'inline_keyboard': self.to_buttons(docs)
         }
         params = {
             'chat_id': update['message']['chat']['id'],
             'text': text,
-            # 'reply_markup': buttons
+            'reply_markup': buttons
         }
         await self.send_to_telegram(method, params)
 
@@ -111,8 +109,7 @@ class MessageHandler(ITelegramHandler):
 
     @staticmethod
     def to_buttons(docs):
-        # print(docs[0]['log'])
-        return [{
+        return [[{
             'text': doc['log'],
             'callback_data': '/mail {}'.format(str(doc['_id']))
-        } for doc in docs]
+        }] for doc in docs]

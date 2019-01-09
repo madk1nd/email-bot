@@ -1,16 +1,21 @@
 import base64
-from Crypto import Random
-from Crypto.Cipher import AES
-from ..config import SECRET
+from ..config import PRIVATE_PATH, PUBLIC_PATH
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
 
-iv = Random.new().read(AES.block_size)
+pub_key = RSA.importKey(open(PUBLIC_PATH).read())
+priv_key = RSA.importKey(open(PRIVATE_PATH).read())
 
 
 def encode(message):
-    obj = AES.new(SECRET, AES.MODE_CFB, iv)
-    return base64.urlsafe_b64encode(obj.encrypt(message))
+    cipher = PKCS1_OAEP.new(pub_key)
+    return base64.urlsafe_b64encode(
+        cipher.encrypt(message.encode('utf-8'))
+    )
 
 
-def decode(cipher):
-    obj2 = AES.new(SECRET, AES.MODE_CFB, iv)
-    return obj2.decrypt(base64.urlsafe_b64decode(cipher))
+def decode(text):
+    cipher = PKCS1_OAEP.new(priv_key)
+    return cipher.decrypt(
+        base64.urlsafe_b64decode(text)
+    ).decode('utf-8')

@@ -14,7 +14,7 @@ class Dispatcher:
         self.session = aiohttp.ClientSession()
         self.handlers = [
             MessageHandler(self.session, mongo),
-            CallbackHandler(self.session)
+            CallbackHandler(self.session, mongo)
         ]
 
     async def dispatch(self, update):

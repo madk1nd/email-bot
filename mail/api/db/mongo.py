@@ -1,9 +1,8 @@
 import pymongo
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson.objectid import ObjectId
-from ..config import MONGO_URL, SECRET
-from simplecrypt import encrypt, decrypt
-import time
+from ..config import MONGO_URL
+from ..db.decoder import encode, decode
 
 
 class MongoClient:
@@ -23,16 +22,11 @@ class MongoClient:
         await self.col.create_index([('chat', pymongo.HASHED)])
 
     async def insert(self, chat, mail, log, pas):
-        t = int(round(time.time() * 1000))
-        s = encrypt(SECRET, log)
-        print(s)
-        end = int(round(time.time() * 1000))
-        print(end - t)
         await self.col.insert_one({
             'chat': chat,
             'mail': mail,
-            'log': encrypt(SECRET, log),
-            'pass': encrypt(SECRET, pas)
+            'log': encode(log),
+            'pass': encode(pas)
         })
 
     async def find_by(self, chat):
@@ -52,6 +46,6 @@ class MongoClient:
 
     @staticmethod
     def map(doc):
-        doc['log'] = decrypt(SECRET, doc['log'])
-        doc['pass'] = decrypt(SECRET, doc['pass'])
+        doc['log'] = decode(doc['log'])
+        doc['pass'] = decode(doc['pass'])
         return doc

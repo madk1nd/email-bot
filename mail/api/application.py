@@ -3,7 +3,7 @@ import ssl
 import logging
 from aiohttp import web
 from aiohttp_swagger import setup_swagger
-from .config import IP, PORT, MAIL_CERT_PATH, TOKEN
+from .config import IP, PORT, MAIL_CERT_PATH, TOKEN, PRIVATE_PATH, PUBLIC_PATH
 from .views import routes
 from .dispatcher import Dispatcher
 from .db.mongo import MongoClient
@@ -32,12 +32,19 @@ async def on_startup(app):
 
 def prepare_ssl():
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    if not MAIL_CERT_PATH:
-        raise Exception('Can\'t find certificates MAIL_CERT_PATH--> Failed to start')
-    if not TOKEN:
-        raise Exception('Can\'t find bot token (BOT_TOKEN) --> Failed to start')
+
+    check_var(MAIL_CERT_PATH)
+    check_var(TOKEN)
+    check_var(PRIVATE_PATH)
+    check_var(PUBLIC_PATH)
+
     context.load_cert_chain(
         MAIL_CERT_PATH + 'email_bot.pem',
         MAIL_CERT_PATH + 'email_bot_private.key'
     )
     return context
+
+
+def check_var(var):
+    if not var:
+        raise Exception('Can\'t find ({}) --> Failed to start'.format(var))

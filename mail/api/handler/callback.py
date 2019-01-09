@@ -6,12 +6,13 @@ logger = logging.getLogger('CallbackHandler')
 
 class CallbackHandler(ITelegramHandler):
 
-    __slots__ = ['methods']
+    __slots__ = ['methods', 'mongo']
 
-    def __init__(self, session):
+    def __init__(self, session, mongo):
         super().__init__(session)
         self.methods = dict()
         self.init_methods()
+        self.mongo = mongo
 
     def init_methods(self):
         self.methods['/yandex'] = self.on_yandex
@@ -61,6 +62,7 @@ class CallbackHandler(ITelegramHandler):
     async def on_mail(self, update):
         method = 'sendMessage'
         text = 'All cool'
+        doc = await self.mongo.find_by_id(update['callback_query']['data'].split()[1])
         params = {
             'chat_id': update['callback_query']['message']['chat']['id'],
             'text': text,

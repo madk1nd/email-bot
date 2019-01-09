@@ -7,4 +7,5 @@ TOKEN = environ.get('BOT_TOKEN')
 MONGO_URL = environ.get('MAIL_MONGO_URL', 'mongodb://localhost:27017')
 TELEGRAM_API = 'https://api.telegram.org/bot{token}'.format(token=TOKEN)
 # AES key must be either 16, 24, or 32 bytes long
-SECRET = environ.get('MAIL_DB_SECRET', 'mysixteenbytekey')
+PRIVATE_PATH = environ.get('MAIL_PRIVATE_SECRET')
+PUBLIC_PATH = environ.get('MAIL_PUBLIC_SECRET')
