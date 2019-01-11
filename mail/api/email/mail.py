@@ -1,6 +1,16 @@
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 
 
 class IMailReceiver(metaclass=ABCMeta):
-    def __init__(self):
-        pass
+
+    @abstractmethod
+    async def get_conn(self, log, pas):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_count(self, doc):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_unseen(self, doc):
+        raise NotImplementedError

@@ -1,10 +1,10 @@
 import base64
-from ..config import PRIVATE_PATH, PUBLIC_PATH
+from ..config import ENC_KEY, ENC_PUB
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 
-pub_key = RSA.importKey(open(PUBLIC_PATH).read())
-priv_key = RSA.importKey(open(PRIVATE_PATH).read())
+pub_key = RSA.importKey(open(ENC_PUB).read())
+priv_key = RSA.importKey(open(ENC_KEY).read())
 
 
 def encode(message):
