@@ -32,11 +32,11 @@ async def on_startup(app):
 
 def prepare_ssl():
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    check_var(TOKEN)
+    check_var(TOKEN, 'BOT_TOKEN')
     context.load_cert_chain(PUBLIC_PATH, PRIVATE_PATH)
     return context
 
 
-def check_var(var):
+def check_var(var, name):
     if not var:
-        raise Exception('Can\'t find ({}) --> Failed to start'.format(var))
+        raise Exception('Can\'t find ({}) --> Failed to start'.format(name))

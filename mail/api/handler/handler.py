@@ -5,6 +5,17 @@ from abc import ABCMeta, abstractmethod
 logger = logging.getLogger('ITelegramHandler')
 
 
+def button_row(*args):
+    return [button_from(x) for x in args]
+
+
+def button_from(text):
+    return {
+        'text': text,
+        'callback_data': '/answer {}'.format(text)
+    }
+
+
 class ITelegramHandler(metaclass=ABCMeta):
 
     __slots__ = ['session']

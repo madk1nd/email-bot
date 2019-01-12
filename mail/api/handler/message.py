@@ -1,5 +1,5 @@
 import logging
-from .handler import ITelegramHandler
+from .handler import ITelegramHandler, button_row
 
 
 logger = logging.getLogger('MessageHandler')
@@ -65,20 +65,23 @@ class MessageHandler(ITelegramHandler):
         await self.send_to_telegram(method, params)
 
     async def on_login(self, update):
-        command = update['message']['text'].split()
         chat_id = update['message']['chat']['id']
-        if len(command) == 4:
-            mail_box = command[1]
-            args = command[2:4]
-            await self.mongo.insert(
-                chat_id,
-                mail_box,
-                args[0],
-                args[1]
-            )
+
+        buttons = {
+            'inline_keyboard': [
+                button_row('Yandex', 'Gmail'),
+                button_row('q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'),
+                button_row('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'),
+                button_row('@', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '.', '⬅️'),
+                button_row('done', 'cancel')
+            ]
+        }
+
         await self.send_to_telegram('sendMessage', {
             'chat_id': chat_id,
-            'text': 'success',
+            'text': 'Let\'s add new account to your accounts list:     ',
+            'parse_mode': 'markdown',
+            'reply_markup': buttons
         })
 
     async def on_accounts(self, update):
@@ -109,3 +112,4 @@ class MessageHandler(ITelegramHandler):
             'text': doc['log'],
             'callback_data': '/mail {}'.format(str(doc['_id']))
         }] for doc in docs]
+

@@ -1,5 +1,5 @@
 import logging
-from .handler import ITelegramHandler
+from .handler import ITelegramHandler, button_row
 from ..email.yandex import YandexMailBox
 from ..email.gmail import GMailBox
 
@@ -24,6 +24,7 @@ class CallbackHandler(ITelegramHandler):
         self.methods['/yandex'] = self.on_yandex
         self.methods['/gmail'] = self.on_gmail
         self.methods['/mail'] = self.on_mail
+        self.methods['/answer'] = self.on_answer
 
     async def dispatch(self, update):
         logger.debug('callback_handler dispatch method call')
@@ -31,9 +32,29 @@ class CallbackHandler(ITelegramHandler):
         if method:
             await method(update)
 
+    async def on_answer(self, update):
+        method = 'editMessageText'
+        buttons = {
+            'inline_keyboard': [
+                button_row('Yandex', 'Gmail'),
+                button_row('q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'),
+                button_row('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'),
+                button_row('z', 'x', 'c', 'v', 'b', 'n', 'm', '⬅️'),
+                button_row('done', 'cancel')
+            ]
+        }
+        params = {
+            'chat_id': update['callback_query']['message']['chat']['id'],
+            'message_id': update['callback_query']['message']['message_id'],
+            'text': update['callback_query']['message']['text'] + update['callback_query']['data'].split()[1],
+            'parse_mode': 'markdown',
+            'reply_markup': buttons
+        }
+        await self.send_to_telegram(method, params)
+
     async def on_yandex(self, update):
         method = 'sendMessage'
-        text = 'I order to use *me* you must create app credentials in *Yandex*.\n' \
+        text = 'In order to use *me* you must create app credentials in *Yandex*.\n' \
                'Here you can find some [instructions]' \
                '(https://yandex.com/support/passport/authorization/app-passwords.html)\n' \
                'Please do not send me your account credentials because this is *not secure*\n' \
@@ -44,13 +65,14 @@ class CallbackHandler(ITelegramHandler):
         params = {
             'chat_id': update['callback_query']['message']['chat']['id'],
             'text': text,
-            'parse_mode': 'Markdown'
+            'parse_mode': 'Markdown',
+            'disable_web_page_preview': True
         }
         await self.send_to_telegram(method, params)
 
     async def on_gmail(self, update):
         method = 'sendMessage'
-        text = 'I order to use *me* you must create app credentials in *Google*.\n' \
+        text = 'In order to use *me* you must create app credentials in *Google*.\n' \
                'Here you can find some [instructions]' \
                '(https://support.google.com/mail/answer/185833?hl=en)\n' \
                'Please do not send me your account credentials because this is *not secure*\n' \
@@ -61,7 +83,8 @@ class CallbackHandler(ITelegramHandler):
         params = {
             'chat_id': update['callback_query']['message']['chat']['id'],
             'text': text,
-            'parse_mode': 'Markdown'
+            'parse_mode': 'Markdown',
+            'disable_web_page_preview': True
         }
         await self.send_to_telegram(method, params)
 
