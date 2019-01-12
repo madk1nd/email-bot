@@ -13,3 +13,11 @@ You can do this by executing following line of code in the terminal:
 Then you will be able to start service through the command
 
     $ bin/watch 
+    
+### Emulator
+This service will work only if telegram webhooks is already setup
+and telegram already know were to send messages. If not you can use 
+service emulator to emulate telegram webhooks through the long polling 
+getUpdates() method. To do so you need to run command:
+
+    $ bin/emulate
