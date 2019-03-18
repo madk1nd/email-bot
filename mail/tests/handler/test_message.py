@@ -6,6 +6,9 @@ from asynctest import CoroutineMock
 
 from api.handler.message import MessageHandler
 
+SEND_TO_TELEGRAM = 'api.handler.message.MessageHandler.send_to_telegram'
+ON_DEFAULT = 'api.handler.message.MessageHandler.on_default'
+
 docs = [
     [{
         'log': 'log_{}{}'.format(x, y),
@@ -26,7 +29,7 @@ def test_buttons(doc):
 @pytest.mark.asyncio
 async def test_on_login():
     handler = MessageHandler(MagicMock(), MagicMock())
-    with mock.patch('api.handler.message.MessageHandler.send_to_telegram', new=CoroutineMock()) as send:
+    with mock.patch(SEND_TO_TELEGRAM, new=CoroutineMock()) as send:
         await handler.on_login({
             'message': {
                 'chat': {
@@ -46,7 +49,7 @@ async def test_on_login():
 @pytest.mark.asyncio
 async def test_on_start():
     handler = MessageHandler(MagicMock(), MagicMock())
-    with mock.patch('api.handler.message.MessageHandler.send_to_telegram', new=CoroutineMock()) as send:
+    with mock.patch(SEND_TO_TELEGRAM, new=CoroutineMock()) as send:
         await handler.on_start({
             'message': {
                 'chat': {
@@ -66,7 +69,7 @@ async def test_on_start():
 @pytest.mark.asyncio
 async def test_on_help():
     handler = MessageHandler(MagicMock(), MagicMock())
-    with mock.patch('api.handler.message.MessageHandler.send_to_telegram', new=CoroutineMock()) as send:
+    with mock.patch(SEND_TO_TELEGRAM, new=CoroutineMock()) as send:
         await handler.on_help({
             'message': {
                 'chat': {
@@ -84,7 +87,7 @@ async def test_on_help():
 @pytest.mark.asyncio
 async def test_on_default():
     handler = MessageHandler(MagicMock(), MagicMock())
-    with mock.patch('api.handler.message.MessageHandler.send_to_telegram', new=CoroutineMock()) as send:
+    with mock.patch(SEND_TO_TELEGRAM, new=CoroutineMock()) as send:
         await handler.on_default({
             'message': {
                 'chat': {
@@ -103,7 +106,7 @@ async def test_on_default():
 async def test_on_accounts():
     mongo = MagicMock()
     handler = MessageHandler(MagicMock(), mongo)
-    with mock.patch('api.handler.message.MessageHandler.send_to_telegram', new=CoroutineMock()) as send:
+    with mock.patch(SEND_TO_TELEGRAM, new=CoroutineMock()) as send:
         docs_cor = CoroutineMock()
         docs_cor.return_value = [
             {
@@ -115,7 +118,7 @@ async def test_on_accounts():
                 '_id': 'hash2'
             },
         ]
-        with mock.patch.object(mongo, 'find_by', new=docs_cor) as docs:
+        with mock.patch.object(mongo, 'find_by', new=docs_cor):
             await handler.on_accounts({
                 'message': {
                     'chat': {
@@ -145,7 +148,7 @@ async def test_dispatch():
         await handler.dispatch(message)
         handler.methods[message['key']].assert_called_once()
 
-    with mock.patch('api.handler.message.MessageHandler.on_default', new=CoroutineMock()) as default:
+    with mock.patch(ON_DEFAULT, new=CoroutineMock()) as default:
         await handler.dispatch({'message': {'text': 'wrong param'}})
         default.assert_called_once()
 
