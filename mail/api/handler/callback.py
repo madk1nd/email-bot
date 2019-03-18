@@ -1,56 +1,38 @@
 import logging
-from .handler import ITelegramHandler, button_row
+from .handler import ITelegramHandler
 from ..email.yandex import YandexMailBox
 from ..email.gmail import GMailBox
+from .register import RegHandler
 
 logger = logging.getLogger('CallbackHandler')
 
 
 class CallbackHandler(ITelegramHandler):
 
-    __slots__ = ['methods', 'mongo', 'email_boxes']
+    __slots__ = ['methods', 'mongo', 'email_boxes', 'reg_handler']
 
     def __init__(self, session, mongo):
         super().__init__(session)
         self.methods = dict()
-        self.init_methods()
         self.mongo = mongo
+        self.reg_handler = RegHandler(session, mongo)
         self.email_boxes = {
             'yandex': YandexMailBox(),
             'gmail': GMailBox()
         }
+        self.init_methods()
 
     def init_methods(self):
         self.methods['/yandex'] = self.on_yandex
         self.methods['/gmail'] = self.on_gmail
         self.methods['/mail'] = self.on_mail
-        self.methods['/answer'] = self.on_answer
+        self.methods['/answer'] = self.reg_handler.dispatch
 
     async def dispatch(self, update):
         logger.debug('callback_handler dispatch method call')
         method = self.methods.get(update['callback_query']['data'].split()[0])
         if method:
             await method(update)
-
-    async def on_answer(self, update):
-        method = 'editMessageText'
-        buttons = {
-            'inline_keyboard': [
-                button_row('Yandex', 'Gmail'),
-                button_row('q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'),
-                button_row('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'),
-                button_row('z', 'x', 'c', 'v', 'b', 'n', 'm', '⬅️'),
-                button_row('done', 'cancel')
-            ]
-        }
-        params = {
-            'chat_id': update['callback_query']['message']['chat']['id'],
-            'message_id': update['callback_query']['message']['message_id'],
-            'text': update['callback_query']['message']['text'] + update['callback_query']['data'].split()[1],
-            'parse_mode': 'markdown',
-            'reply_markup': buttons
-        }
-        await self.send_to_telegram(method, params)
 
     async def on_yandex(self, update):
         method = 'sendMessage'

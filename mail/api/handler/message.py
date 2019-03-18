@@ -7,13 +7,13 @@ logger = logging.getLogger('MessageHandler')
 
 class MessageHandler(ITelegramHandler):
 
-    __slots__ = ['methods', 'mongo']
+    __slots__ = ['methods', 'mongo', 'login_handler']
 
     def __init__(self, session, mongo):
         super().__init__(session)
         self.methods = dict()
-        self.init_methods()
         self.mongo = mongo
+        self.init_methods()
 
     def init_methods(self):
         self.methods['/start'] = self.on_start
@@ -27,6 +27,22 @@ class MessageHandler(ITelegramHandler):
             await method(update)
         else:
             await self.on_default(update)
+
+    async def on_login(self, update):
+        chat_id = update['message']['chat']['id']
+        method = 'sendMessage'
+        buttons = {
+            'inline_keyboard': [
+                button_row('Yandex', 'Gmail')
+            ]
+        }
+        await self.send_to_telegram(method, {
+            'chat_id': chat_id,
+            'text': 'Ok. Let\'s start to register new account!\n'
+                    'Please choose mailbox type:',
+            'parse_mode': 'markdown',
+            'reply_markup': buttons
+        })
 
     async def on_start(self, update):
         method = 'sendMessage'
@@ -63,26 +79,6 @@ class MessageHandler(ITelegramHandler):
             'text': text,
         }
         await self.send_to_telegram(method, params)
-
-    async def on_login(self, update):
-        chat_id = update['message']['chat']['id']
-
-        buttons = {
-            'inline_keyboard': [
-                button_row('Yandex', 'Gmail'),
-                button_row('q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'),
-                button_row('a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'),
-                button_row('@', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '.', '⬅️'),
-                button_row('done', 'cancel')
-            ]
-        }
-
-        await self.send_to_telegram('sendMessage', {
-            'chat_id': chat_id,
-            'text': 'Let\'s add new account to your accounts list:     ',
-            'parse_mode': 'markdown',
-            'reply_markup': buttons
-        })
 
     async def on_accounts(self, update):
         docs = await self.mongo.find_by(update['message']['chat']['id'])
