@@ -22,7 +22,7 @@ async def test_on_dispatch_message():
 async def test_on_dispatch_callback():
     dispatcher = Dispatcher(MagicMock())
     update = {'callback_query': {'text': 'test', 'chat': {'id': 12}}}
-    with mock.patch('%s' % CALLBACK_HANDLER_DISPATCH, new=CoroutineMock()) as dispatch:
+    with mock.patch(CALLBACK_HANDLER_DISPATCH, new=CoroutineMock()) as dispatch:
         await dispatcher.dispatch(update)
         dispatch.assert_called_once_with(update)
 
