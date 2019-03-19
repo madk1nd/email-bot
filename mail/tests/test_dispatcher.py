@@ -5,12 +5,15 @@ import pytest
 from api.dispatcher import Dispatcher
 from asynctest import CoroutineMock
 
+CALLBACK_HANDLER_DISPATCH = 'api.handler.callback.CallbackHandler.dispatch'
+MESSAGE_HANDLER_DISPATCH = 'api.handler.message.MessageHandler.dispatch'
+
 
 @pytest.mark.asyncio
 async def test_on_dispatch_message():
     dispatcher = Dispatcher(MagicMock())
     update = {'message': {'text': 'test', 'chat': {'id': 12}}}
-    with mock.patch('api.handler.message.MessageHandler.dispatch', new=CoroutineMock()) as dispatch:
+    with mock.patch(MESSAGE_HANDLER_DISPATCH, new=CoroutineMock()) as dispatch:
         await dispatcher.dispatch(update)
         dispatch.assert_called_once_with(update)
 
@@ -19,7 +22,7 @@ async def test_on_dispatch_message():
 async def test_on_dispatch_callback():
     dispatcher = Dispatcher(MagicMock())
     update = {'callback_query': {'text': 'test', 'chat': {'id': 12}}}
-    with mock.patch('api.handler.callback.CallbackHandler.dispatch', new=CoroutineMock()) as dispatch:
+    with mock.patch('%s' % CALLBACK_HANDLER_DISPATCH, new=CoroutineMock()) as dispatch:
         await dispatcher.dispatch(update)
         dispatch.assert_called_once_with(update)
 
@@ -32,4 +35,4 @@ async def test_on_dispatch_error():
         await dispatcher.dispatch(update)
         assert False
     except Exception as e:
-        assert True
+        assert str(e) == 'Unexpected update type'

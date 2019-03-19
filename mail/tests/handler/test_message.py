@@ -2,9 +2,8 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
-from asynctest import CoroutineMock
-
 from api.handler.message import MessageHandler
+from asynctest import CoroutineMock
 
 SEND_TO_TELEGRAM = 'api.handler.message.MessageHandler.send_to_telegram'
 ON_DEFAULT = 'api.handler.message.MessageHandler.on_default'
