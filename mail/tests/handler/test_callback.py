@@ -26,13 +26,14 @@ async def test_dispatch():
 async def test_on_yandex():
     handler = CallbackHandler(MagicMock(), MagicMock())
     with mock.patch(SEND_TO_TELEGRAM, new=CoroutineMock()) as send:
-        await handler.on_yandex({
+        await handler.on_mail_choice({
             'callback_query': {
                 'message': {
                     'chat': {
                         'id': 12
                     }
-                }
+                },
+                'data': '/yandex',
             }
         })
         args, _ = send.call_args
@@ -48,20 +49,21 @@ async def test_on_yandex():
 async def test_on_gmail():
     handler = CallbackHandler(MagicMock(), MagicMock())
     with mock.patch(SEND_TO_TELEGRAM, new=CoroutineMock()) as send:
-        await handler.on_gmail({
+        await handler.on_mail_choice({
             'callback_query': {
                 'message': {
                     'chat': {
                         'id': 12
                     }
-                }
+                },
+                'data': '/gmail',
             }
         })
         args, _ = send.call_args
         send.assert_called_once()
         assert args[0] == 'sendMessage'
         assert args[1]['chat_id'] == 12
-        assert args[1]['text'][57:63] == 'Google'
+        assert args[1]['text'][57:62] == 'Gmail'
         assert args[1]['parse_mode'] == 'Markdown'
         assert args[1]['disable_web_page_preview'] is True
 
