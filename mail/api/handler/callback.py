@@ -23,8 +23,8 @@ class CallbackHandler(ITelegramHandler):
         self.init_methods()
 
     def init_methods(self):
-        self.methods['/yandex'] = self.on_yandex
-        self.methods['/gmail'] = self.on_gmail
+        self.methods['/yandex'] = self.on_mail_choice
+        self.methods['/gmail'] = self.on_mail_choice
         self.methods['/mail'] = self.on_mail
         self.methods['/answer'] = self.reg_handler.dispatch
 
@@ -34,34 +34,21 @@ class CallbackHandler(ITelegramHandler):
         if method:
             await method(update)
 
-    async def on_yandex(self, update):
+    async def on_mail_choice(self, update):
+        mail_type = update['callback_query']['data'][1:]
         method = 'sendMessage'
-        text = 'In order to use *me* you must create app credentials in *Yandex*.\n' \
+        text = 'In order to use *me* you must create app credentials in *{cap}*.\n' \
                'Here you can find some [instructions]' \
                '(https://yandex.com/support/passport/authorization/app-passwords.html)\n' \
                'Please do not send me your account credentials because this is *not secure*\n' \
                'Send me your login and application password by typing:\n' \
-               '`/login <mail_type> <login> <app_password>`\n' \
+               '`/login {type} <login> <app_password>`\n' \
                'for example:\n' \
-               '`/login yandex ivanov@yandex.ru your_app_pass`'
-        params = {
-            'chat_id': update['callback_query']['message']['chat']['id'],
-            'text': text,
-            'parse_mode': 'Markdown',
-            'disable_web_page_preview': True
-        }
-        await self.send_to_telegram(method, params)
-
-    async def on_gmail(self, update):
-        method = 'sendMessage'
-        text = 'In order to use *me* you must create app credentials in *Google*.\n' \
-               'Here you can find some [instructions]' \
-               '(https://support.google.com/mail/answer/185833?hl=en)\n' \
-               'Please do not send me your account credentials because this is *not secure*\n' \
-               'Send me your login and application password by typing:\n' \
-               '`/login <mail_type> <login> <app_password>`\n' \
-               'for example:\n' \
-               '`/login gmail ivanov@yandex.ru your_app_pass`'
+               '`/login {type} ivanov@yandex.ru your_app_pass`' \
+            .format(
+                cap=mail_type.capitalize(),
+                type=mail_type
+            )
         params = {
             'chat_id': update['callback_query']['message']['chat']['id'],
             'text': text,

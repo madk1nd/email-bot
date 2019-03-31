@@ -71,8 +71,10 @@ class MessageHandler(ITelegramHandler):
 
     async def on_help(self, update):
         method = 'sendMessage'
-        text = """List of available commands:
-        /start, /help
+        text = """List of available commands: 
+            /start 
+            /help
+            /accounts
         """
         params = {
             'chat_id': update['message']['chat']['id'],

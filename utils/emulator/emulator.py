@@ -1,16 +1,19 @@
 import asyncio
 import aiohttp
+import json
+import pprint
 from config import TOKEN, IP, PORT
 
 
 class WebhookEmulator:
-    __slots__ = ['loop', 'session', 'token', 'offset']
+    __slots__ = ['loop', 'session', 'token', 'offset', 'printer']
 
     def __init__(self, loop, token):
         self.loop = loop
         self.session = None
         self.token = token
         self.offset = None
+        self.printer = pprint.PrettyPrinter(indent=2)
 
     async def connect(self):
         self.session = aiohttp.ClientSession()
@@ -26,7 +29,7 @@ class WebhookEmulator:
             params = {'offset': self.offset, 'timeout': 20} if self.offset else {'timeout': 20}
             async with self.session.get(url=telegram_url, params=params) as response:
                 updates = await response.json()
-                print(updates)
+                print(json.dumps(updates, indent=4, ensure_ascii=False))
                 if updates['result']:
                     await self.send_to_bot(updates)
 
